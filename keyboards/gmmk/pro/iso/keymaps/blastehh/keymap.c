@@ -15,6 +15,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include QMK_KEYBOARD_H
+#include "print.h"
 
 #define _HSV_CAPSLOCK_ENABLED_COLOR 0, 255 , 255
 #define _HSV_GUILOCK_ENABLED_COLOR 0, 255 , 255
@@ -104,6 +105,8 @@ static bool end_held;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     static bool mo_held;
+    static uint16_t sft_timer;
+
     switch (keycode) {
         case KC_END:
             if (record->event.pressed) {
@@ -147,6 +150,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 return true;
             }
             break;
+
+        case KC_LSFT:
+            if (record->event.pressed) {
+                //print("shift pressed\n");
+                if (sft_timer && (timer_elapsed(sft_timer) < 200)) {
+                    //print("tapping caps\n");
+                    tap_code(KC_CAPS);
+                }
+                sft_timer = timer_read();
+            }
+            return true;
     }
     return true; // We didn't handle other keypresses
 }
