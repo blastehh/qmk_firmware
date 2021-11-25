@@ -20,7 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _HSV_CAPSLOCK_ENABLED_COLOR 0, 255 , 255
 #define _HSV_GUILOCK_ENABLED_COLOR 0, 255 , 255
 #define _HSV_NUMPAD_ENABLED_COLOR 85, 255 , 255
+
 static bool gui_locked = false;
+static bool mo_held;
+
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -60,10 +63,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 bool encoder_update_user(uint8_t index, bool clockwise) {
     if (clockwise) {
         //tap_code(KC_VOLU);
-        tap_code(KC_F24);
+        if (mo_held) {
+            tap_code16(LCTL(LGUI(KC_LEFT)));
+        } else {
+            tap_code(KC_F24);
+        }
     } else {
         //tap_code(KC_VOLD);
-        tap_code(KC_F23);
+        if (mo_held) {
+            tap_code16(LCTL(LGUI(KC_RGHT)));
+        } else {
+            tap_code(KC_F23);
+        }
     }
     return true;
 }
@@ -122,7 +133,6 @@ static uint16_t end_held_timer;
 static bool end_held;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-    static bool mo_held;
     static uint16_t sft_timer;
 
     switch (keycode) {
